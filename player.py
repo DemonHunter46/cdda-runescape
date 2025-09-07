@@ -10,6 +10,14 @@ class Player:
         self.health = 20
         self.max_mana = 10
         self.mana = 10
+        self.skills = {
+            "Attack": 1,
+            "Defense": 1,
+            "Magic": 1,
+            "Mining": 1,
+            "Woodcutting": 1,
+            "Fishing": 1,
+        }
 
     def move(self, dx, dy, game_map):
         new_x = self.x + dx
