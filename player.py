@@ -3,6 +3,9 @@ class Player:
         self.x = x
         self.y = y
         self.inventory = []
+        self.equipped_weapon = None
+        self.equipped_armor = None
+        self.equipped_trinket = None
 
     def move(self, dx, dy, game_map):
         new_x = self.x + dx
