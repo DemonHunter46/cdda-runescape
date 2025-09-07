@@ -29,6 +29,10 @@ def main():
         while True:
             console.clear()
 
+            # Display health and mana at the top
+            console.print(1, 0, f"HP: {player.health}/{player.max_health}", fg=(255, 80, 80))
+            console.print(20, 0, f"MP: {player.mana}/{player.max_mana}", fg=(80, 80, 255))
+
             # Draw map
             for y in range(SCREEN_HEIGHT):
                 for x in range(SCREEN_WIDTH):
