@@ -1,4 +1,5 @@
 import tcod
+import random
 from player import Player, display_stats, display_inventory
 SCREEN_WIDTH = 120
 SCREEN_HEIGHT = 60
@@ -63,6 +64,65 @@ TILES = {
     # Add more as you identify them!
 }
 
+def generate_house(x, y, w, h, door_side=None):
+    house = {}
+    for i in range(x, x + w):
+        for j in range(y, y + h):
+            if i == x or i == x + w - 1 or j == y or j == y + h - 1:
+                house[(i, j)] = "wall"
+            else:
+                house[(i, j)] = "floor"
+    # Randomize door side if not provided
+    if door_side is None:
+        door_side = random.choice(["top", "bottom", "left", "right"])
+    # Add a door on the specified side
+    if door_side == "top":
+        door_x = x + w // 2
+        house[(door_x, y)] = "door"
+    elif door_side == "bottom":
+        door_x = x + w // 2
+        house[(door_x, y + h - 1)] = "door"
+    elif door_side == "left":
+        door_y = y + h // 2
+        house[(x, door_y)] = "door"
+    elif door_side == "right":
+        door_y = y + h // 2
+        house[(x + w - 1, door_y)] = "door"
+    return house
+
+def can_place_house(house_tiles, town):
+    for pos in house_tiles:
+        if pos in town and town[pos] in ("road", "plaza", "wall", "door"):
+            return False
+    return True
+
+def generate_town(width, height, num_houses):
+    town = {}
+    # Add plaza in the center
+    cx, cy = width // 2, height // 2
+    for i in range(cx - 2, cx + 3):
+        for j in range(cy - 2, cy + 3):
+            town[(i, j)] = "plaza"
+    # Add roads (horizontal and vertical)
+    for i in range(width):
+        town[(i, cy)] = "road"
+    for j in range(height):
+        town[(cx, j)] = "road"
+    # Add houses
+    attempts = 0
+    placed = 0
+    while placed < num_houses and attempts < num_houses * 10:
+        w, h = random.choice([(6, 6), (8, 5), (5, 7)])
+        hx = random.randint(2, width - w - 2)
+        hy = random.randint(2, height - h - 2)
+        door_side = random.choice(["top", "bottom", "left", "right"])
+        house = generate_house(hx, hy, w, h, door_side)
+        if can_place_house(house, town):
+            town.update(house)
+            placed += 1
+        attempts += 1
+    return town
+
 def main():
     # Load a tileset (font)
     tileset = tcod.tileset.load_tilesheet(
@@ -80,9 +140,13 @@ def main():
 
         player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+        town = generate_town(40, 40, 10)  # Generate a town for testing
+
         while True:
             console.clear()
             # Draw the map and player
+            for (x, y), tile_type in town.items():
+                console.tiles[y, x] = TILES[tile_type]
             console.print(player.x, player.y, "@", fg=(255, 255, 255))
 
             # Show inventory or stats if requested
